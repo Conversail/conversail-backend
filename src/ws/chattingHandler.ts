@@ -33,4 +33,20 @@ export default function registerChattingHandler(io: Server, socket: Socket) {
 
     ack(messageId);
   });
+
+  socket.on("typing", async () => {
+    const { roomKey, receiverId } = await getRoomAndReceiverId(userId);
+
+    if (!roomKey || !receiverId) return;
+
+    io.to(receiverId).emit("typing");
+  });
+
+  socket.on("stop typing", async () => {
+    const { roomKey, receiverId } = await getRoomAndReceiverId(userId);
+
+    if (!roomKey || !receiverId) return;
+
+    io.to(receiverId).emit("stop typing");
+  });
 }
