@@ -4,7 +4,7 @@ import { type Message } from '../types';
 import { randomUUID } from 'crypto';
 import { getRoomAndReceiverId } from '../utils';
 
-export default function registerChattingHandler (io: Server, socket: Socket): void {
+export default function registerChattingHandler(io: Server, socket: Socket): void {
   const userId = socket.data.userId;
 
   socket.on('message', async ({ content, replyTo, sentAt }, ack) => {

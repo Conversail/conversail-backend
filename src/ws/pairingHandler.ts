@@ -2,7 +2,7 @@ import { type Server, type Socket } from 'socket.io';
 import rClient from '../redis';
 import { getRoomAndReceiverId } from '../utils';
 
-export default function registerPairingHandler (io: Server, socket: Socket): void {
+export default function registerPairingHandler(io: Server, socket: Socket): void {
   const userId: string = socket.data.userId;
 
   socket.on('pair', async () => {

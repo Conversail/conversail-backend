@@ -18,12 +18,33 @@
         ],
         "semi": "off",
         "@typescript-eslint/semi": [
-            "error",
+            "warn",
             "always"
         ],
         "@typescript-eslint/strict-boolean-expressions": "off",
         "@typescript-eslint/prefer-nullish-coalescing": "off",
         "@typescript-eslint/consistent-type-definitions": "off",
-        "@typescript-eslint/no-floating-promises": "off"
+        "@typescript-eslint/no-floating-promises": "off",
+        "object-curly-spacing": "off",
+        "@typescript-eslint/object-curly-spacing": [
+            "warn",
+            "always"
+        ],
+        "space-before-function-paren": "off",
+        "@typescript-eslint/space-before-function-paren": [
+            "warn",
+            {
+                "anonymous": "always",
+                "named": "never",
+                "asyncArrow": "always"
+            }
+        ],
+        "quotes": "off",
+        "@typescript-eslint/quotes": [
+            "warn"
+        ],
+        "eol-last": "warn",
+        "comma-dangle": "off",
+        "@typescript-eslint/comma-dangle": "warn"
     }
 }

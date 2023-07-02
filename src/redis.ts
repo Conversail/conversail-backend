@@ -9,7 +9,7 @@ const rClient = createClient({
   }
 });
 
-async function initRedis (): Promise<void> {
+async function initRedis(): Promise<void> {
   await rClient.connect();
   await rClient.flushDb();
 }

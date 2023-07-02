@@ -1,8 +1,21 @@
-import app from './server';
+import { ApolloServer } from '@apollo/server';
+import { startStandaloneServer } from '@apollo/server/standalone';
 import 'dotenv/config';
+import { resolvers, typeDefs } from './graphql';
 
-const PORT = process.env.PORT || 8000;
+const PORT: number = Number(process.env.PORT) || 8000;
 
-app.listen(PORT);
+const server = new ApolloServer({
+  typeDefs,
+  resolvers
 
-console.log(`Server running on http://localhost:${PORT}`);
+});
+
+async function startServer(): Promise<void> {
+  const { url } = await startStandaloneServer(server, {
+    listen: { port: PORT }
+  });
+
+  console.log(`Server running on ${url}`);
+}
+startServer();

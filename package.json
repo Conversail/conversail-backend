@@ -32,10 +32,11 @@
     "eslint-plugin-promise": "^6.0.0",
     "prettier": "^2.8.8",
     "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
     "typescript": "*"
   },
   "scripts": {
-    "dev": "ts-node src/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "babel src --extensions .ts --out-dir dist",
     "start": "node dist/index.js"
   }

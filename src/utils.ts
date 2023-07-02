@@ -1,6 +1,6 @@
 import rClient from './redis';
 
-export async function getRoomAndReceiverId (
+export async function getRoomAndReceiverId(
   userId: string
 ): Promise<{ roomKey: string, receiverId: string }> {
   const chatKeys = await rClient.keys(`chat:*${userId}*:room`);
