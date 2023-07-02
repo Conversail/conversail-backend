@@ -45,6 +45,7 @@
         ],
         "eol-last": "warn",
         "comma-dangle": "off",
-        "@typescript-eslint/comma-dangle": "warn"
+        "@typescript-eslint/comma-dangle": "warn",
+        "no-multiple-empty-lines": "warn"
     }
 }
