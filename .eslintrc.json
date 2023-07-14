@@ -41,7 +41,11 @@
         ],
         "quotes": "off",
         "@typescript-eslint/quotes": [
-            "warn"
+            "warn",
+            "double",
+            {
+                "allowTemplateLiterals": true
+            }
         ],
         "eol-last": "warn",
         "comma-dangle": "off",

@@ -2,7 +2,9 @@
   "compilerOptions": {
     "sourceMap": true,
     "outDir": "dist",
-    "lib": ["esnext"],
+    "lib": [
+      "esnext"
+    ],
     "esModuleInterop": true
   }
 }

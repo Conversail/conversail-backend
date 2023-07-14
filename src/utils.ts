@@ -1,4 +1,4 @@
-import rClient from './redis';
+import rClient from "./redis";
 
 export async function getRoomAndReceiverId(
   userId: string
@@ -8,10 +8,10 @@ export async function getRoomAndReceiverId(
   if (chatKeys.length !== 1) return { roomKey: null, receiverId: null };
 
   const receiverId = chatKeys[0]
-    .replace(userId, '')
-    .replace('chat:', '')
-    .replace('_', '')
-    .replace(':room', '');
+    .replace(userId, "")
+    .replace("chat:", "")
+    .replace("_", "")
+    .replace(":room", "");
 
   return {
     roomKey: chatKeys[0],

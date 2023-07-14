@@ -1,52 +1,64 @@
-import { type Server, type Socket } from 'socket.io';
-import rClient from '../redis';
-import { type Message } from '../types';
-import { randomUUID } from 'crypto';
-import { getRoomAndReceiverId } from '../utils';
+import { type Server, type Socket } from "socket.io";
+import rClient from "../redis";
+import { EventsFromClient, EventsToClient, type Message } from "../types";
+import { randomUUID } from "crypto";
+import { getRoomAndReceiverId } from "../utils";
 
 export default function registerChattingHandler(io: Server, socket: Socket): void {
   const userId = socket.data.userId;
 
-  socket.on('message', async ({ content, replyTo, sentAt }, ack) => {
+  socket.on(EventsFromClient.sendMessage, async ({ content, replyTo, createdAt }, ack) => {
     const { roomKey, receiverId } = await getRoomAndReceiverId(userId);
 
     if (!roomKey || !receiverId) return;
 
     const messageId = randomUUID();
 
+    const messageKey = `${roomKey}:message:${messageId}`;
+
     await rClient
       .multi()
-      .hSet(`${roomKey}:message:${messageId}`, 'content', content)
-      .hSet(`${roomKey}:message:${messageId}`, 'replyTo', replyTo ?? 0)
-      .hSet(`${roomKey}:message:${messageId}`, 'sentAt', sentAt)
-      .hSet(`${roomKey}:message:${messageId}`, 'sender', userId)
-      .hSet(`${roomKey}:message:${messageId}`, 'receiver', receiverId)
+      .hSet(messageKey, "content", content)
+      .hSet(messageKey, "replyTo", replyTo ?? 0)
+      .hSet(messageKey, "createdAt", createdAt)
+      .hSet(messageKey, "sender", userId)
+      .hSet(messageKey, "receiver", receiverId)
       .exec();
 
-    io.to(receiverId).emit('message', {
+    io.to(receiverId).emit(EventsToClient.incomingMessage, {
       id: messageId,
       content,
       replyTo,
-      sentAt,
+      createdAt,
       fromYourself: false
     } satisfies Message);
 
     ack(messageId);
   });
 
-  socket.on('typing', async () => {
+  socket.on(EventsFromClient.startedTyping, async () => {
     const { roomKey, receiverId } = await getRoomAndReceiverId(userId);
 
     if (!roomKey || !receiverId) return;
 
-    io.to(receiverId).emit('typing');
+    io.to(receiverId).emit(EventsToClient.startedTyping);
   });
 
-  socket.on('stop typing', async () => {
+  socket.on(EventsFromClient.stoppedTyping, async () => {
     const { roomKey, receiverId } = await getRoomAndReceiverId(userId);
 
     if (!roomKey || !receiverId) return;
 
-    io.to(receiverId).emit('stop typing');
+    io.to(receiverId).emit(EventsToClient.stoppedTyping);
+  });
+
+  socket.on(EventsFromClient.reportMate, async () => {
+    await rClient.sRem("pairing_waitlist", userId);
+    io.to(userId).emit(EventsToClient.chatEnded);
+
+    const { roomKey, receiverId } = await getRoomAndReceiverId(userId);
+
+    io.to(receiverId).emit(EventsToClient.chatEnded);
+    if (roomKey) await rClient.del(roomKey);
   });
 }
