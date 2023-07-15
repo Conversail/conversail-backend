@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  MEMBER
+  MODERATOR
+}
+
+model User {
+  id             String           @id @default(uuid())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  email          String           @unique
+  username       String           @unique
+  firstName      String
+  lastName       String?
+  password       String
+  role           UserRole
+  ReportJudgment ReportJudgment[]
+}
+
+model ChatPreferences {
+  id                 String     @id @default(uuid())
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  connection         Connection @relation(fields: [connectionId], references: [id])
+  connectionId       String     @unique
+  pairingLanguage    String
+  allowImages        Boolean
+  allowVoiceMessages Boolean
+}
+
+model Connection {
+  id               String           @id @default(uuid())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  ipAddress        String
+  ChatPreferences  ChatPreferences?
+  sentMessages     Message[]        @relation("SentMessages")
+  receivedMessages Message[]        @relation("ReceivedMessages")
+  chatsAsUser1     Chat[]           @relation("ChatsAsUser1")
+  chatsAsUser2     Chat[]           @relation("ChatsAsUser2")
+  createdReports   Report[]         @relation("CreatedReports")
+  receivedReports  Report[]         @relation("ReceivedReports")
+}
+
+model Message {
+  id         String     @id @default(uuid())
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  sender     Connection @relation("SentMessages", fields: [senderId], references: [id])
+  senderId   String
+  receiver   Connection @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiverId String
+  content    String
+  replyTo    String?
+  Chat       Chat       @relation(fields: [chatId], references: [id])
+  chatId     String
+}
+
+model Chat {
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user1     Connection @relation("ChatsAsUser1", fields: [user1Id], references: [id])
+  user1Id   String
+  user2     Connection @relation("ChatsAsUser2", fields: [user2Id], references: [id])
+  user2Id   String
+  messages  Message[]
+  reports   Report[]
+}
+
+model Report {
+  id               String           @id @default(uuid())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  author           Connection       @relation("CreatedReports", fields: [authorId], references: [id])
+  authorId         String
+  recipient        Connection       @relation("ReceivedReports", fields: [recipientId], references: [id])
+  recipientId      String
+  chat             Chat             @relation(fields: [chatId], references: [id])
+  chatId           String
+  judgments        ReportJudgment[]
+  finished         Boolean
+  finishedAt       DateTime?
+  guilty           Boolean?
+  permanentBan     Boolean?
+  banTimeInMinutes Int?
+}
+
+model ReportJudgment {
+  id               String    @id @default(uuid())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  moderator        User      @relation(fields: [moderatorId], references: [id])
+  moderatorId      String
+  Report           Report    @relation(fields: [reportId], references: [id])
+  reportId         String
+  guilty           Boolean
+  permanentBan     Boolean?
+  banTimeInMinutes DateTime?
+}
