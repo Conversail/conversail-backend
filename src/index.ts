@@ -9,6 +9,14 @@ import cors from "cors";
 import { Server } from "socket.io";
 import { json } from "body-parser";
 import connectionHandler from "./ws/connectionHandler";
+import rClient from "./cache/redis";
+
+export async function initRedis(): Promise<void> {
+  await rClient.connect();
+  await rClient.flushDb();
+  rClient.on("error", (err) => { console.log("Redis Client Error", err); });
+}
+initRedis();
 
 const app = express();
 const httpServer = createServer(app);

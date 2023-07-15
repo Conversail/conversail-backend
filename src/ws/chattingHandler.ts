@@ -1,8 +1,8 @@
 import { type Server, type Socket } from "socket.io";
-import rClient from "../redis";
+import rClient from "../cache/redis";
 import { EventsFromClient, EventsToClient, type Message } from "../types";
 import { randomUUID } from "crypto";
-import { getRoomAndReceiverId } from "../utils";
+import { getRoomAndReceiverId } from "../cache/utils";
 
 export default function registerChattingHandler(io: Server, socket: Socket): void {
   const userId = socket.data.userId;

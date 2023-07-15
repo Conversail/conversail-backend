@@ -1,6 +1,6 @@
 import { type Server, type Socket } from "socket.io";
-import rClient from "../redis";
-import { getRoomAndReceiverId } from "../utils";
+import rClient from "../cache/redis";
+import { getRoomAndReceiverId } from "../cache/utils";
 import { EventsFromClient, EventsToClient } from "../types";
 
 export default function registerPairingHandler(io: Server, socket: Socket): void {

@@ -18,3 +18,11 @@ export async function getRoomAndReceiverId(
     receiverId
   };
 }
+
+export async function createMessage(): Promise<void> {
+
+}
+
+export async function storeChatInDB(): Promise<void> {
+
+}

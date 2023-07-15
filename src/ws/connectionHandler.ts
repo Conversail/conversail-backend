@@ -1,6 +1,6 @@
 import { type User } from "../types";
 import { randomUUID } from "crypto";
-import rClient from "../redis";
+import rClient from "../cache/redis";
 import registerChattingHandler from "../ws/chattingHandler";
 import registerPairingHandler from "../ws/pairingHandler";
 import { type Server, type Socket } from "socket.io";
