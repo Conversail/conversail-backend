@@ -10,10 +10,12 @@ import { Server } from "socket.io";
 import { json } from "body-parser";
 import connectionHandler from "./ws/connectionHandler";
 import rClient from "./cache/redis";
+import { PrismaClient } from "@prisma/client";
 
-export async function initRedis(): Promise<void> {
+export const prisma = new PrismaClient();
+
+async function initRedis(): Promise<void> {
   await rClient.connect();
-  await rClient.flushDb();
   rClient.on("error", (err) => { console.log("Redis Client Error", err); });
 }
 initRedis();

@@ -1,4 +1,4 @@
-import { type User } from "../types";
+import { type Connection } from "../types";
 import { randomUUID } from "crypto";
 import rClient from "../cache/redis";
 import registerChattingHandler from "../ws/chattingHandler";
@@ -6,14 +6,30 @@ import registerPairingHandler from "../ws/pairingHandler";
 import { type Server, type Socket } from "socket.io";
 
 export default async function connectionHandler(io: Server, socket: Socket): Promise<void> {
-  const user: User = {
+  const connection: Connection = {
     id: randomUUID(),
-    ipAddress: socket.handshake.address
+    ipAddress: socket.handshake.address,
+    createdAt: new Date(),
+    chatPreferences: {
+      id: randomUUID(),
+      createdAt: new Date(),
+      pairingLanguage: "en",
+      allowImages: false,
+      allowVoiceMessages: false
+    }
   };
 
-  socket.data.userId = user.id;
-  socket.join(user.id);
-  await rClient.hSet(`online_user:${user.id}`, "ipAddress", user.ipAddress);
+  socket.data.connectionId = connection.id;
+  socket.join(connection.id);
+  await rClient.hSet(`connection:${connection.id}`, {
+    ipAddress: connection.ipAddress,
+    createdAt: connection.createdAt.getTime(),
+    "chatPreferences:id": connection.chatPreferences.id,
+    "chatPreferences:createdAt": connection.chatPreferences.createdAt.getTime(),
+    "chatPreferences:pairingLanguage": connection.chatPreferences.pairingLanguage,
+    "chatPreferences:allowImages": connection.chatPreferences.allowImages ? 1 : 0,
+    "chatPreferences:allowVoiceMessages": connection.chatPreferences.allowVoiceMessages ? 1 : 0
+  });
 
   registerPairingHandler(io, socket);
   registerChattingHandler(io, socket);

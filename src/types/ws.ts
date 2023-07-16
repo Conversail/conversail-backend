@@ -4,7 +4,8 @@ export enum EventsFromClient {
   sendMessage = "sendMessage",
   startedTyping = "startedTyping",
   stoppedTyping = "stoppedTyping",
-  reportMate = "reportMate"
+  reportMate = "reportMate",
+  updateChatPreferences = "updateChatPreferences"
 }
 
 export enum EventsToClient {
@@ -12,5 +13,6 @@ export enum EventsToClient {
   chatEnded = "chatEnded",
   incomingMessage = "incomingMessage",
   startedTyping = "startedTyping",
-  stoppedTyping = "stoppedTyping"
+  stoppedTyping = "stoppedTyping",
+  updatedChatPreferences = "updatedChatPreferences"
 }

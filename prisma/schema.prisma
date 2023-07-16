@@ -26,69 +26,58 @@ model User {
   connections     Connection[]
 }
 
-model ChatPreferences {
-  id                 String     @id @default(uuid())
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
-  connection         Connection @relation(fields: [connectionId], references: [id])
-  connectionId       String     @unique
-  pairingLanguage    String
-  allowImages        Boolean
-  allowVoiceMessages Boolean
-}
-
 model Connection {
-  id               String           @id @default(uuid())
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  ipAddress        String
-  ChatPreferences  ChatPreferences?
-  user             User?            @relation(fields: [userId], references: [id])
-  userId           String?
-  sentMessages     Message[]        @relation("SentMessages")
-  receivedMessages Message[]        @relation("ReceivedMessages")
-  chatsAsUser1     Chat[]           @relation("ChatsAsUser1")
-  chatsAsUser2     Chat[]           @relation("ChatsAsUser2")
-  createdReports   Report[]         @relation("CreatedReports")
-  receivedReports  Report[]         @relation("ReceivedReports")
+  id                 String    @id @default(uuid())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  ipAddress          String
+  user               User?     @relation(fields: [userId], references: [id], onUpdate: Cascade)
+  userId             String?
+  sentMessages       Message[] @relation("SentMessages")
+  receivedMessages   Message[] @relation("ReceivedMessages")
+  ChatsAsConnection1 Chat[]    @relation("ChatsAsConnection1")
+  ChatsAsConnection2 Chat[]    @relation("ChatsAsConnection2")
+  createdReports     Report[]  @relation("CreatedReports")
+  receivedReports    Report[]  @relation("ReceivedReports")
 }
 
 model Message {
   id         String     @id @default(uuid())
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
-  sender     Connection @relation("SentMessages", fields: [senderId], references: [id])
+  sender     Connection @relation("SentMessages", fields: [senderId], references: [id], onUpdate: Cascade)
   senderId   String
-  receiver   Connection @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiver   Connection @relation("ReceivedMessages", fields: [receiverId], references: [id], onUpdate: Cascade)
   receiverId String
   content    String
   replyTo    String?
-  Chat       Chat       @relation(fields: [chatId], references: [id])
+  Chat       Chat       @relation(fields: [chatId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   chatId     String
 }
 
 model Chat {
-  id        String     @id @default(uuid())
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  user1     Connection @relation("ChatsAsUser1", fields: [user1Id], references: [id])
-  user1Id   String
-  user2     Connection @relation("ChatsAsUser2", fields: [user2Id], references: [id])
-  user2Id   String
-  messages  Message[]
-  reports   Report[]
+  id            String     @id @default(uuid())
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  connection1   Connection @relation("ChatsAsConnection1", fields: [connection1Id], references: [id], onUpdate: Cascade)
+  connection1Id String
+  connection2   Connection @relation("ChatsAsConnection2", fields: [connection2Id], references: [id], onUpdate: Cascade)
+  connection2Id String
+  messages      Message[]
+  reports       Report[]
 }
 
 model Report {
   id               String           @id @default(uuid())
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
-  author           Connection       @relation("CreatedReports", fields: [authorId], references: [id])
+  author           Connection       @relation("CreatedReports", fields: [authorId], references: [id], onUpdate: Cascade)
   authorId         String
-  recipient        Connection       @relation("ReceivedReports", fields: [recipientId], references: [id])
+  recipient        Connection       @relation("ReceivedReports", fields: [recipientId], references: [id], onUpdate: Cascade)
   recipientId      String
   chat             Chat             @relation(fields: [chatId], references: [id])
   chatId           String
+  reason           String
   judgments        ReportJudgment[]
   finished         Boolean
   finishedAt       DateTime?
@@ -101,9 +90,9 @@ model ReportJudgment {
   id               String    @id @default(uuid())
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
-  moderator        User      @relation(fields: [moderatorId], references: [id])
+  moderator        User      @relation(fields: [moderatorId], references: [id], onUpdate: Cascade)
   moderatorId      String
-  Report           Report    @relation(fields: [reportId], references: [id])
+  report           Report    @relation(fields: [reportId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   reportId         String
   guilty           Boolean
   permanentBan     Boolean?
