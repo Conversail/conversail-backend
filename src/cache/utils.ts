@@ -25,15 +25,15 @@ export async function handleFinishedChat(connectionId: string): Promise<void> {
 
   if (roomKey) {
     const keys = await rClient.keys(`${roomKey}*`);
-    const receiver = await rClient.hGetAll(`connection:${receiverId}`);
+    const connection = await rClient.hGetAll(`connection:${connectionId}`);
 
     const multi = rClient.multi();
     keys.forEach(key => {
       (async () => {
-        multi.rename(key, `finished_chat:${connectionId}:room${key.split(":room")[1]}`);
+        multi.rename(key, `finished_chat:${receiverId}:room${key.split(":room")[1]}`);
       })();
     });
-    multi.hSet(`finished_chat:${connectionId}:room:receiver`, receiver);
+    multi.hSet(`finished_chat:${receiverId}:room:receiver`, connection);
     await multi.exec();
   } else {
     const keys = await rClient.keys(`finished_chat:${connectionId}:room*`);
