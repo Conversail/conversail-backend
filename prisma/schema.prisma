@@ -13,16 +13,17 @@ enum UserRole {
 }
 
 model User {
-  id             String           @id @default(uuid())
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  email          String           @unique
-  username       String           @unique
-  firstName      String
-  lastName       String?
-  password       String
-  role           UserRole
-  ReportJudgment ReportJudgment[]
+  id              String           @id @default(uuid())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  email           String           @unique
+  username        String           @unique
+  firstName       String
+  lastName        String?
+  password        String
+  role            UserRole
+  reportJudgments ReportJudgment[]
+  connections     Connection[]
 }
 
 model ChatPreferences {
@@ -42,6 +43,8 @@ model Connection {
   updatedAt        DateTime         @updatedAt
   ipAddress        String
   ChatPreferences  ChatPreferences?
+  user             User?            @relation(fields: [userId], references: [id])
+  userId           String?
   sentMessages     Message[]        @relation("SentMessages")
   receivedMessages Message[]        @relation("ReceivedMessages")
   chatsAsUser1     Chat[]           @relation("ChatsAsUser1")
