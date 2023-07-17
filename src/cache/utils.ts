@@ -26,12 +26,9 @@ export async function handleFinishedChat(connectionId: string): Promise<void> {
   if (roomKey) {
     const keys = await rClient.keys(`${roomKey}*`);
     const connection = await rClient.hGetAll(`connection:${connectionId}`);
-
     const multi = rClient.multi();
     keys.forEach(key => {
-      (async () => {
-        multi.rename(key, `finished_chat:${receiverId}:room${key.split(":room")[1]}`);
-      })();
+      multi.rename(key, `finished_chat:${receiverId}:room${key.split(":room")[1]}`);
     });
     multi.hSet(`finished_chat:${receiverId}:room:receiver`, connection);
     await multi.exec();
@@ -40,9 +37,7 @@ export async function handleFinishedChat(connectionId: string): Promise<void> {
 
     const multi = rClient.multi();
     keys.forEach((key) => {
-      (async () => {
-        multi.del(key);
-      })();
+      multi.del(key);
     });
     await multi.exec();
   }

@@ -40,7 +40,7 @@ export default function registerPairingHandler(io: Server, socket: Socket): void
 
     io.to(receiverId).emit(EventsToClient.chatEnded);
 
-    handleFinishedChat(connectionId);
+    await handleFinishedChat(connectionId);
     await rClient.del(`connection:${connectionId}`);
   });
 }
