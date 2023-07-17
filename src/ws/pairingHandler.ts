@@ -1,31 +1,46 @@
-import { Server, Socket } from "socket.io";
-import rClient from "../redis";
-import { getRoomAndReceiverId } from "../utils";
+import { type Server, type Socket } from "socket.io";
+import rClient from "../cache/redis";
+import { getRoomAndReceiverId, handleFinishedChat } from "../cache/utils";
+import { EventsFromClient, EventsToClient } from "../types";
+import { randomUUID } from "crypto";
 
-export default function registerPairingHandler(io: Server, socket: Socket) {
-  const userId = socket.data.userId;
+export default function registerPairingHandler(io: Server, socket: Socket): void {
+  const connectionId: string = socket.data.connectionId;
 
-  socket.on("pair", async () => {
-    const waitingUser = await rClient.sRandMember("pairing_waitlist");
+  socket.on(EventsFromClient.startPairing, async () => {
+    handleFinishedChat(connectionId);
+    const raffledConnectionId = await rClient.sRandMember("pairing_waitlist");
 
-    if (!waitingUser) return await rClient.sAdd("pairing_waitlist", userId);
+    if (!raffledConnectionId) return await rClient.sAdd("pairing_waitlist", connectionId);
+
+    const connectionIds = [raffledConnectionId, connectionId];
+    connectionIds.sort();
 
     await rClient
       .multi()
-      .sRem("pairing_waitlist", waitingUser)
-      .set(`chat:${userId}_${waitingUser}:room`, 1)
+      .sRem("pairing_waitlist", raffledConnectionId)
+      .set(`chat:${connectionIds.join("_")}:room`, randomUUID())
       .exec();
 
-    io.to([userId, waitingUser]).emit("paired");
+    io.to([connectionId, raffledConnectionId]).emit(EventsToClient.paired);
   });
 
-  socket.on("cancel chatting", async () => {
-    await rClient.sRem("pairing_waitlist", userId);
-    io.to(userId).emit("chat ended");
+  socket.on(EventsFromClient.cancelChatting, async () => {
+    await rClient.sRem("pairing_waitlist", connectionId);
+    io.to(connectionId).emit(EventsToClient.chatEnded);
 
-    const { roomKey, receiverId } = await getRoomAndReceiverId(userId);
+    const { receiverId } = await getRoomAndReceiverId(connectionId);
 
-    io.to(receiverId).emit("chat ended");
-    if (roomKey) await rClient.del(roomKey);
+    io.to(receiverId).emit(EventsToClient.chatEnded);
+  });
+
+  socket.on("disconnect", async () => {
+    await rClient.sRem("pairing_waitlist", connectionId);
+    const { receiverId } = await getRoomAndReceiverId(connectionId);
+
+    io.to(receiverId).emit(EventsToClient.chatEnded);
+
+    handleFinishedChat(connectionId);
+    await rClient.del(`connection:${connectionId}`);
   });
 }
