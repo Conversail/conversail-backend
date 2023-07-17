@@ -72,7 +72,10 @@ export async function createReport({ reason, authorId }: { reason: string, autho
     }
   }
 
-  if (!key || !recipient || !author || chatId) return;
+  if (!key || !recipient || !author || !chatId) return;
+
+  recipient.id = receiverId;
+  author.id = authorId;
 
   const connections = [author, recipient];
   connections.sort((a, b) => a.id - b.id);
@@ -84,7 +87,7 @@ export async function createReport({ reason, authorId }: { reason: string, autho
 
     return {
       id: messageId,
-      createdAt: message.createdAt,
+      createdAt: new Date(Number(message.createdAt)),
       senderId: message.sender,
       receiverId: message.receiver,
       content: message.content,
@@ -93,57 +96,69 @@ export async function createReport({ reason, authorId }: { reason: string, autho
     };
   }));
 
-  await prisma.report.create({
-    data: {
-      reason,
-      finished: false,
-      author: {
-        connectOrCreate: {
-          where: {
-            id: author.id
-          },
-          create: {
-            id: author.id,
-            ipAddress: author.ipAddress
-          }
-        }
-      },
-      recipient: {
-        connectOrCreate: {
-          where: {
-            id: recipient.id
-          },
-          create: {
-            id: recipient.id,
-            ipAddress: recipient.ipAddress
-          }
-        }
-      },
-      chat: {
-        connectOrCreate: {
-          where: {
-            id: chatId
-          },
-          create: {
-            id: chatId,
-            connection1: {
-              connect: {
-                id: connections[0].id
-              }
+  await prisma.$transaction([
+    prisma.report.create({
+      data: {
+        reason,
+        finished: false,
+        author: {
+          connectOrCreate: {
+            where: {
+              id: author.id
             },
-            connection2: {
-              connect: {
-                id: connections[1].id
-              }
+            create: {
+              id: author.id,
+              ipAddress: author.ipAddress
+            }
+          }
+        },
+        recipient: {
+          connectOrCreate: {
+            where: {
+              id: recipient.id
             },
-            messages: {
-              createMany: {
-                data: messages
+            create: {
+              id: recipient.id,
+              ipAddress: recipient.ipAddress
+            }
+          }
+        },
+        chat: {
+          connectOrCreate: {
+            where: {
+              id: chatId
+            },
+            create: {
+              id: chatId,
+              connection1: {
+                connectOrCreate: {
+                  where: {
+                    id: connections[1].id
+                  },
+                  create: {
+                    id: connections[1].id,
+                    ipAddress: connections[1].ipAddress
+                  }
+                }
+              },
+              connection2: {
+                connectOrCreate: {
+                  where: {
+                    id: connections[1].id
+                  },
+                  create: {
+                    id: connections[1].id,
+                    ipAddress: connections[1].ipAddress
+                  }
+                }
               }
             }
           }
         }
       }
-    }
-  });
+    }),
+    prisma.message.createMany({
+      data: messages
+    })
+  ]);
 }

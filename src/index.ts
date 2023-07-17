@@ -16,6 +16,7 @@ export const prisma = new PrismaClient();
 
 async function initRedis(): Promise<void> {
   await rClient.connect();
+  await rClient.flushAll();
   rClient.on("error", (err) => { console.log("Redis Client Error", err); });
 }
 initRedis();

@@ -35,8 +35,8 @@ model Connection {
   userId             String?
   sentMessages       Message[] @relation("SentMessages")
   receivedMessages   Message[] @relation("ReceivedMessages")
-  ChatsAsConnection1 Chat[]    @relation("ChatsAsConnection1")
-  ChatsAsConnection2 Chat[]    @relation("ChatsAsConnection2")
+  chatsAsConnection1 Chat[]    @relation("ChatsAsConnection1")
+  chatsAsConnection2 Chat[]    @relation("ChatsAsConnection2")
   createdReports     Report[]  @relation("CreatedReports")
   receivedReports    Report[]  @relation("ReceivedReports")
 }
@@ -51,7 +51,7 @@ model Message {
   receiverId String
   content    String
   replyTo    String?
-  Chat       Chat       @relation(fields: [chatId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  chat       Chat       @relation(fields: [chatId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   chatId     String
 }
 
