@@ -82,7 +82,7 @@ export async function createReport({ reason, authorId }: { reason: string, autho
 
     return {
       id: messageId,
-      createdAt: new Date(Number(message.createdAt)),
+      createdAt: new Date(message.createdAt),
       senderId: message.sender,
       receiverId: message.receiver,
       content: message.content,
