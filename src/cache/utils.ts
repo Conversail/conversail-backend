@@ -20,6 +20,18 @@ export async function getRoomAndReceiverId(
   };
 }
 
+export async function removeFromWaitlist(
+  connectionId: string
+): Promise<boolean> {
+  const chatKeys = await rClient.keys(`pairing_waitlist:*`);
+
+  for (const key of chatKeys) {
+    await rClient.sRem(key, connectionId);
+  }
+
+  return true;
+}
+
 export async function handleFinishedChat(connectionId: string): Promise<void> {
   const { roomKey, receiverId } = await getRoomAndReceiverId(connectionId);
 

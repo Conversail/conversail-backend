@@ -5,7 +5,7 @@ import { randomUUID } from "crypto";
 import { createReport, getRoomAndReceiverId } from "../cache/utils";
 
 export default function registerChattingHandler(io: Server, socket: Socket): void {
-  const connectionId = socket.data.connectionId;
+  const connectionId: string = socket.data.connectionId;
 
   socket.on(EventsFromClient.sendMessage, async ({ content, replyTo, createdAt }, ack) => {
     const { roomKey, receiverId } = await getRoomAndReceiverId(connectionId);
@@ -59,9 +59,9 @@ export default function registerChattingHandler(io: Server, socket: Socket): voi
     const { receiverId } = await getRoomAndReceiverId(connectionId);
 
     await rClient.multi()
-      .hSet(`connection:${receiverId}`, "chatPreferences:pairingLanguage", pairingLanguage)
-      .hSet(`connection:${receiverId}`, "chatPreferences:allowImages", allowImages ? 1 : 0)
-      .hSet(`connection:${receiverId}`, "chatPreferences:allowVoiceMessages", allowVoiceMessages ? 1 : 0)
+      .hSet(`connection:${connectionId}`, "chatPreferences:pairingLanguage", pairingLanguage)
+      .hSet(`connection:${connectionId}`, "chatPreferences:allowImages", allowImages ? 1 : 0)
+      .hSet(`connection:${connectionId}`, "chatPreferences:allowVoiceMessages", allowVoiceMessages ? 1 : 0)
       .exec();
 
     io.to(receiverId).emit(EventsToClient.updatedChatPreferences, { pairingLanguage, allowImages, allowVoiceMessages });

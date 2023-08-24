@@ -6,6 +6,8 @@ import registerPairingHandler from "../ws/pairingHandler";
 import { type Server, type Socket } from "socket.io";
 
 export default async function connectionHandler(io: Server, socket: Socket): Promise<void> {
+  const { pairingLanguage, allowImages, allowVoiceMessages } = socket.handshake.query;
+
   const connection: Connection = {
     id: randomUUID(),
     ipAddress: socket.handshake.address,
@@ -13,9 +15,9 @@ export default async function connectionHandler(io: Server, socket: Socket): Pro
     chatPreferences: {
       id: randomUUID(),
       createdAt: new Date(),
-      pairingLanguage: "en",
-      allowImages: false,
-      allowVoiceMessages: false
+      pairingLanguage: pairingLanguage as string ?? "en",
+      allowImages: allowImages === "true",
+      allowVoiceMessages: allowVoiceMessages === "true"
     }
   };
 
